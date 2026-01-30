@@ -83,6 +83,11 @@ class DataMap {
     this.dataSelectionManager = new DataSelectionManager(lassoSelectionItemId);
   }
 
+
+
+
+
+
   addPoints(pointData, {
     pointSize,
     pointOutlineColor = [250, 250, 250, 128],
@@ -584,4 +589,110 @@ class DataMap {
     });
     this.pointLayer = updatedPointLayer;
   }
+
+  //edge panning code
+  enableEdgePanning(edgeThreshold = 50, maxSpeed = 5.0) {
+  console.log('Edge panning enabled!');
+  
+  let isPanning = false;
+  let panX = 0;
+  let panY = 0;
+  let animationFrameId = null;
+  let currentViewState = null;
+
+  const calculatePanSpeed = (distance, threshold) => {
+    const ratio = Math.max(0, ((threshold - distance) / threshold)**2);
+    return ratio * maxSpeed;
+  };
+
+  // FIXED: Always apply view state changes
+  const onViewStateChange = ({viewState}) => {
+    currentViewState = viewState;
+    
+    // Apply edge panning offset if active
+    if (isPanning) {
+      currentViewState = {
+        ...currentViewState,
+        longitude: currentViewState.longitude + panX,
+        latitude: currentViewState.latitude + panY,
+      };
+    }
+    
+    // CRITICAL: Always update the view
+    this.deckgl.setProps({
+      viewState: currentViewState
+    });
+    
+    return {viewState: currentViewState};
+  };
+
+  // Set up controlled mode
+  const initialView = this.deckgl.props.initialViewState;
+  currentViewState = initialView;
+  
+  this.deckgl.setProps({
+    viewState: currentViewState,
+    onViewStateChange: onViewStateChange,
+    controller: { scrollZoom: { speed: 0.01, smooth: true } }
+  });
+
+  const updatePan = () => {
+    if (!isPanning || !currentViewState) return;
+
+    // Force a view state change to trigger onViewStateChange
+    // This will add the pan offset
+    const newState = {
+      ...currentViewState,
+      longitude: currentViewState.longitude + panX,
+      latitude: currentViewState.latitude + panY,
+    };
+    
+    // Manually call onViewStateChange to apply the update
+    onViewStateChange({viewState: newState});
+
+    animationFrameId = requestAnimationFrame(updatePan);
+  };
+
+  this.container.addEventListener('mousemove', (e) => {
+    const rect = this.container.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const width = rect.width;
+    const height = rect.height;
+
+    panX = 0;
+    panY = 0;
+
+    if (x < edgeThreshold) {
+      panX = -calculatePanSpeed(x, edgeThreshold);
+    } else if (x > width - edgeThreshold) {
+      panX = calculatePanSpeed(width - x, edgeThreshold);
+    }
+
+    if (y < edgeThreshold) {
+      panY = calculatePanSpeed(y, edgeThreshold);
+    } else if (y > height - edgeThreshold) {
+      panY = -calculatePanSpeed(height - y, edgeThreshold);
+    }
+
+    if ((panX !== 0 || panY !== 0) && !isPanning) {
+      isPanning = true;
+      updatePan();
+    } else if (panX === 0 && panY === 0 && isPanning) {
+      isPanning = false;
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    }
+  });
+
+  this.container.addEventListener('mouseleave', () => {
+    isPanning = false;
+    if (animationFrameId) {
+      cancelAnimationFrame(animationFrameId);
+    }
+  });
+}
+
+
 }

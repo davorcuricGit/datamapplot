@@ -84,6 +84,9 @@
     loadHistogramData();
     {%- endif %}
     
+    // Enable edge panning
+    datamap.enableEdgePanning(50, 0.02); // 50px threshold, 0.02 max speed
+
     {%- if enable_api_tooltip %}
     const tooltip = new DynamicTooltipManager(
       datamap,
