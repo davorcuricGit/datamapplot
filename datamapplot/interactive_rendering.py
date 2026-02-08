@@ -458,6 +458,7 @@ def render_html(
     cluster_colormap=None,
     enable_topic_tree=False,
     topic_tree_kwds={},
+    enable_animation_recorder=False,  # KEYFRAME ANIMATOR
     show_loading_progress=True,
     custom_html=None,
     custom_css=None,
@@ -1030,6 +1031,7 @@ def render_html(
             enable_colormap_selector,
             enable_topic_tree,
             enable_dynamic_tooltip,
+            enable_animation_recorder,  # KEYFRAME ANIMATOR
         ),
         "css_dependency_srcs": get_css_dependency_sources(
             minify_deps,
@@ -1080,6 +1082,7 @@ def render_html(
         page_background_color=page_background_color,
         search=enable_search,
         enable_topic_tree=enable_topic_tree,
+        enable_animation_recorder=enable_animation_recorder,  # KEYFRAME ANIMATOR
         **{
             f"topic_tree_{key}": json.dumps(value)
             for key, value in topic_tree_kwds.items()

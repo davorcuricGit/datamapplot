@@ -366,6 +366,7 @@ def create_interactive_plot(
     cvd_safer=False,
     jupyterhub_api_token=None,
     enable_topic_tree=False,
+    enable_animation_recorder=False, # KEYFRAME PARAMETER
     offline_data_path=None,
     histogram_enable_click_persistence=False,
     **render_html_kwds,
@@ -705,6 +706,7 @@ def create_interactive_plot(
         label_layers=label_layers,
         cluster_colormap=color_map | {noise_label: noise_color},
         enable_topic_tree=enable_topic_tree,
+        enable_animation_recorder=enable_animation_recorder, # KEYFRAME PARAMETER
         offline_data_path=offline_data_path,
         histogram_enable_click_persistence=histogram_enable_click_persistence,
         noise_label=noise_label,

@@ -52,6 +52,11 @@
       {%- if enable_histogram %}
       <div id="d3histogram-container" class="container-box stack-box"></div>
       {%- endif -%}
+
+      {# KEYFRAME CODE #}
+      {%- if enable_animation_recorder %}
+      {% include 'animation_controls.html.jinja2' %}
+      {%- endif -%}
     </div>
   </div>
   

@@ -598,57 +598,42 @@ class DataMap {
   let panX = 0;
   let panY = 0;
   let animationFrameId = null;
-  let currentViewState = null;
 
   const calculatePanSpeed = (distance, threshold) => {
-    const ratio = Math.max(0, ((threshold - distance) / threshold)**2);
+    const ratio = Math.max(0, (threshold - distance) / threshold);
     return ratio * maxSpeed;
   };
 
-  // FIXED: Always apply view state changes
-  const onViewStateChange = ({viewState}) => {
-    currentViewState = viewState;
-    
-    // Apply edge panning offset if active
-    if (isPanning) {
-      currentViewState = {
-        ...currentViewState,
-        longitude: currentViewState.longitude + panX,
-        latitude: currentViewState.latitude + panY,
-      };
-    }
-    
-    // CRITICAL: Always update the view
-    this.deckgl.setProps({
-      viewState: currentViewState
-    });
-    
-    return {viewState: currentViewState};
+  // Track view state properly
+  let viewState = this.deckgl.props.initialViewState;
+
+  const onViewStateChange = ({viewState: newViewState}) => {
+    // Always update our tracked state
+    viewState = newViewState;
+    return {viewState: newViewState};
   };
 
   // Set up controlled mode
-  const initialView = this.deckgl.props.initialViewState;
-  currentViewState = initialView;
-  
   this.deckgl.setProps({
-    viewState: currentViewState,
+    viewState: viewState,
     onViewStateChange: onViewStateChange,
     controller: { scrollZoom: { speed: 0.01, smooth: true } }
   });
 
   const updatePan = () => {
-    if (!isPanning || !currentViewState) return;
+    if (!isPanning) return;
 
-    // Force a view state change to trigger onViewStateChange
-    // This will add the pan offset
-    const newState = {
-      ...currentViewState,
-      longitude: currentViewState.longitude + panX,
-      latitude: currentViewState.latitude + panY,
+    // Apply pan offset to current view
+    viewState = {
+      ...viewState,
+      longitude: viewState.longitude + panX,
+      latitude: viewState.latitude + panY,
     };
-    
-    // Manually call onViewStateChange to apply the update
-    onViewStateChange({viewState: newState});
+
+    // Update deck.gl
+    this.deckgl.setProps({
+      viewState: viewState
+    });
 
     animationFrameId = requestAnimationFrame(updatePan);
   };
@@ -692,7 +677,11 @@ class DataMap {
       cancelAnimationFrame(animationFrameId);
     }
   });
-}
-
+  
+  // Expose viewState getter for animation recorder
+  Object.defineProperty(this.deckgl, 'viewState', {
+    get: () => viewState
+  });
+}  
 
 }

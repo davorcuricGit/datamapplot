@@ -87,6 +87,55 @@
     // Enable edge panning
     datamap.enableEdgePanning(50, 0.02); // 50px threshold, 0.02 max speed
 
+    {%- if enable_animation_recorder %}
+    //=========================================================================
+    // Animation Recorder Setup
+    //=========================================================================
+
+    const animationRecorder = new AnimationRecorder(datamap);
+
+    document.getElementById('add-keyframe-btn').addEventListener('click', () => {
+      const kf = animationRecorder.addKeyframe();
+      updateKeyframesList();
+    });
+
+    document.getElementById('render-animation-btn').addEventListener('click', () => {
+      document.getElementById('render-progress').style.display = 'block';
+      document.getElementById('progress-bar').style.width = '0%';
+      
+      animationRecorder.renderAnimation(30, (current, total) => {
+        const percent = (current / total) * 100;
+        document.getElementById('progress-bar').style.width = percent + '%';
+        document.getElementById('progress-text').textContent = `Rendering: ${current}/${total} frames`;
+      }).then(() => {
+        document.getElementById('progress-text').textContent = 'Complete!';
+        setTimeout(() => {
+          document.getElementById('render-progress').style.display = 'none';
+        }, 2000);
+      });
+    });
+
+    function updateKeyframesList() {
+      const list = document.getElementById('keyframes-list');
+      const keyframes = animationRecorder.getKeyframesList();
+      
+      if (keyframes.length === 0) {
+        list.innerHTML = '<p style="text-align: center; color: #999; margin: 20px 0;">No keyframes yet</p>';
+        return;
+      }
+      
+      list.innerHTML = keyframes.map(kf => `
+        <div style="padding: 5px; border: 1px solid #ddd; margin-bottom: 5px; border-radius: 3px; background: white;">
+          <strong>Frame ${kf.frame}</strong><br>
+          <small>Zoom: ${kf.viewState.zoom.toFixed(2)}, Lon: ${kf.viewState.longitude.toFixed(2)}, Lat: ${kf.viewState.latitude.toFixed(2)}</small>
+          <button onclick="animationRecorder.removeKeyframe(${kf.id}); updateKeyframesList();" 
+                  style="float: right; font-size: 11px; cursor: pointer; background: #ff4444; color: white; border: none; padding: 2px 6px; border-radius: 3px;">×</button>
+        </div>
+      `).join('');
+    }
+    {%- endif %}
+
+
     {%- if enable_api_tooltip %}
     const tooltip = new DynamicTooltipManager(
       datamap,

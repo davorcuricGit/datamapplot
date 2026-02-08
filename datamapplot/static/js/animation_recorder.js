@@ -6,8 +6,7 @@ class AnimationRecorder {
   }
 
   addKeyframe(frameNumber = null) {
-    const currentView = this.datamap.deckgl.deck.viewState || this.datamap.deckgl.props.viewState;
-    
+    const currentView = this.datamap.deckgl.viewState || this.datamap.deckgl.props.viewState;    
     // Auto-increment frame number if not specified
     const frame = frameNumber !== null ? frameNumber : 
                   (this.keyframes.length > 0 ? this.keyframes[this.keyframes.length - 1].frame + 100 : 0);
@@ -104,7 +103,7 @@ class AnimationRecorder {
   }
 
   async captureFrame() {
-    const canvas = this.datamap.deckgl.deck.canvas;
+    const canvas = this.datamap.deckgl.canvas;
     return new Promise((resolve) => {
       canvas.toBlob(blob => resolve(blob), 'image/png');
     });

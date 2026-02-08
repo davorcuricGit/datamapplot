@@ -166,6 +166,8 @@ def get_js_dependency_sources(
     colormap_selector,
     enable_topic_tree,
     enable_dynamic_tooltip,
+    enable_animation_recorder,  # KEYFRAME PARAMETER
+
 ):
     """
     Gather the necessary JavaScript dependency files for embedding in the HTML template.
@@ -212,6 +214,10 @@ def get_js_dependency_sources(
 
     if enable_dynamic_tooltip:
         js_dependencies.append("dynamic_tooltip.js")
+
+    # KEYFRAME BLOCK
+    if enable_animation_recorder:
+        js_dependencies.append("animation_recorder.js")    
 
     for js_file in js_dependencies:
         with open(static_dir / js_file, "r", encoding="utf-8") as file:
