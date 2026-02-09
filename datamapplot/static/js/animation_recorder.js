@@ -17,7 +17,7 @@ class AnimationRecorder {
     
     // Rest stays the same...
     const frame = frameNumber !== null ? frameNumber : 
-                  (this.keyframes.length > 0 ? this.keyframes[this.keyframes.length - 1].frame + 100 : 0);
+                  (this.keyframes.length > 0 ? this.keyframes[this.keyframes.length - 1].frame + 10 : 0);
     
     const keyframe = {
       id: this.keyframes.length,
@@ -70,6 +70,10 @@ class AnimationRecorder {
     
     console.log(`Rendering ${frames.length} frames...`);
     
+    // Create ZIP file
+    const zip = new JSZip();
+    const framesFolder = zip.folder("frames");
+    
     // Render each frame
     for (let i = 0; i < frames.length; i++) {
       const frame = frames[i];
@@ -80,8 +84,9 @@ class AnimationRecorder {
       // Capture frame
       const blob = await this.captureFrame();
       
-      // Download
-      this.downloadBlob(blob, `frame_${String(frame.frameNumber).padStart(4, '0')}.png`);
+      // Add to ZIP instead of downloading
+      const filename = `frame_${String(frame.frameNumber).padStart(4, '0')}.png`;
+      framesFolder.file(filename, blob);
       
       // Progress callback
       if (onProgress) {
@@ -91,6 +96,23 @@ class AnimationRecorder {
       // Small delay to prevent browser lockup
       await this.sleep(50);
     }
+    
+    console.log('Creating ZIP file...');
+    
+    // Generate and download ZIP
+    const zipBlob = await zip.generateAsync({
+      type: "blob",
+      compression: "DEFLATE",
+      compressionOptions: { level: 6 }
+    });
+    
+    // Download the ZIP file
+    const url = URL.createObjectURL(zipBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `animation_${Date.now()}.zip`;
+    a.click();
+    URL.revokeObjectURL(url);
     
     console.log('Animation rendering complete!');
   }
@@ -111,15 +133,6 @@ class AnimationRecorder {
     return new Promise((resolve) => {
       canvas.toBlob(blob => resolve(blob), 'image/png');
     });
-  }
-
-  downloadBlob(blob, filename) {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
   }
 
   lerp(start, end, t) {
