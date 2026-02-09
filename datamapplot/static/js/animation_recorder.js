@@ -6,27 +6,23 @@ class AnimationRecorder {
   }
 
   addKeyframe(frameNumber = null) {
-    // Get current view state from deck.gl's view manager
-    let currentView;
-    if (this.datamap.deckgl.viewManager) {
-      currentView = this.datamap.deckgl.viewManager.getViewState();
-    } else {
-      // Fallback to initial view state
-      currentView = this.datamap.deckgl.props.initialViewState;
-    }
+    // Poll the deck.gl instance directly for current camera position
+    const viewport = this.datamap.deckgl.getViewports()[0];
     
-    // Auto-increment frame number if not specified
+    const currentView = {
+      longitude: viewport.longitude,
+      latitude: viewport.latitude,
+      zoom: viewport.zoom
+    };
+    
+    // Rest stays the same...
     const frame = frameNumber !== null ? frameNumber : 
-                  (this.keyframes.length > 0 ? this.keyframes[this.keyframes.length - 1].frame + 20 : 0);
+                  (this.keyframes.length > 0 ? this.keyframes[this.keyframes.length - 1].frame + 100 : 0);
     
     const keyframe = {
       id: this.keyframes.length,
       frame: frame,
-      viewState: {
-        longitude: currentView.longitude,
-        latitude: currentView.latitude,
-        zoom: currentView.zoom
-      }
+      viewState: currentView
     };
     
     this.keyframes.push(keyframe);

@@ -70,15 +70,17 @@ class DataMap {
     this.layers = [];
     const { viewportWidth, viewportHeight } = getInitialViewportSize();
     const { zoomLevel, dataCenter } = calculateZoomLevel(bounds, viewportWidth, viewportHeight);
+    
     this.deckgl = new deck.DeckGL({
-      container: container,
-      initialViewState: {
-        latitude: dataCenter[1],
-        longitude: dataCenter[0],
-        zoom: zoomLevel
-      },
-      controller: { scrollZoom: { speed: 0.01, smooth: true } },
-    });
+    container: container,
+    initialViewState: {
+      latitude: dataCenter[1],
+      longitude: dataCenter[0],
+      zoom: zoomLevel
+    },
+    controller: { scrollZoom: { speed: 0.01, smooth: true } },
+    // NO onViewStateChange!
+  });
     this.updateTriggerCounter = 0;
     this.dataSelectionManager = new DataSelectionManager(lassoSelectionItemId);
   }
