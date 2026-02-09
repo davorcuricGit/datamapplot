@@ -604,18 +604,21 @@ class DataMap {
     return ratio * maxSpeed;
   };
 
-  // Track view state properly
-  let viewState = this.deckgl.props.initialViewState;
+  // Track view state on the DataMap instance (not on deckgl)
+  this.currentViewState = this.deckgl.props.initialViewState;
 
   const onViewStateChange = ({viewState: newViewState}) => {
-    // Always update our tracked state
-    viewState = newViewState;
+    // Update our tracked state
+    this.currentViewState = newViewState;
+    
+    // Just return the new state - deck.gl will handle the update
     return {viewState: newViewState};
   };
 
   // Set up controlled mode
+  // Set up controlled mode
   this.deckgl.setProps({
-    viewState: viewState,
+    initialViewState: this.currentViewState,  // Use initialViewState, not viewState
     onViewStateChange: onViewStateChange,
     controller: { scrollZoom: { speed: 0.01, smooth: true } }
   });
@@ -624,15 +627,15 @@ class DataMap {
     if (!isPanning) return;
 
     // Apply pan offset to current view
-    viewState = {
-      ...viewState,
-      longitude: viewState.longitude + panX,
-      latitude: viewState.latitude + panY,
+    this.currentViewState = {
+      ...this.currentViewState,
+      longitude: this.currentViewState.longitude + panX,
+      latitude: this.currentViewState.latitude + panY,
     };
 
     // Update deck.gl
     this.deckgl.setProps({
-      viewState: viewState
+      viewState: this.currentViewState
     });
 
     animationFrameId = requestAnimationFrame(updatePan);
@@ -676,11 +679,6 @@ class DataMap {
     if (animationFrameId) {
       cancelAnimationFrame(animationFrameId);
     }
-  });
-  
-  // Expose viewState getter for animation recorder
-  Object.defineProperty(this.deckgl, 'viewState', {
-    get: () => viewState
   });
 }  
 

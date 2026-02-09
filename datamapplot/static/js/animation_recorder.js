@@ -6,10 +6,18 @@ class AnimationRecorder {
   }
 
   addKeyframe(frameNumber = null) {
-    const currentView = this.datamap.deckgl.viewState || this.datamap.deckgl.props.viewState;    
+    // Get current view state from deck.gl's view manager
+    let currentView;
+    if (this.datamap.deckgl.viewManager) {
+      currentView = this.datamap.deckgl.viewManager.getViewState();
+    } else {
+      // Fallback to initial view state
+      currentView = this.datamap.deckgl.props.initialViewState;
+    }
+    
     // Auto-increment frame number if not specified
     const frame = frameNumber !== null ? frameNumber : 
-                  (this.keyframes.length > 0 ? this.keyframes[this.keyframes.length - 1].frame + 100 : 0);
+                  (this.keyframes.length > 0 ? this.keyframes[this.keyframes.length - 1].frame + 20 : 0);
     
     const keyframe = {
       id: this.keyframes.length,
