@@ -30,6 +30,14 @@ class AnimationRecorder {
     return keyframe;
   }
 
+  updateKeyframeViewState(id, property, newValue) {
+    const keyframe = this.keyframes.find(kf => kf.id === id);
+    if (keyframe && keyframe.viewState.hasOwnProperty(property)) {
+      keyframe.viewState[property] = newValue;
+      console.log(`Updated keyframe ${id} ${property} to ${newValue}`);
+    }
+  }
+
   updateKeyframeTime(id, newFrame) {
     const keyframe = this.keyframes.find(kf => kf.id === id);
     if (keyframe) {
