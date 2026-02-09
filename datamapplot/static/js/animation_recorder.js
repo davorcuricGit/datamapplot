@@ -17,7 +17,7 @@ class AnimationRecorder {
     
     // Rest stays the same...
     const frame = frameNumber !== null ? frameNumber : 
-                  (this.keyframes.length > 0 ? this.keyframes[this.keyframes.length - 1].frame + 10 : 0);
+                  (this.keyframes.length > 0 ? this.keyframes[this.keyframes.length - 1].frame + 100 : 0);
     
     const keyframe = {
       id: this.keyframes.length,
@@ -28,6 +28,14 @@ class AnimationRecorder {
     this.keyframes.push(keyframe);
     console.log('Keyframe added:', keyframe);
     return keyframe;
+  }
+
+  updateKeyframeTime(id, newFrame) {
+    const keyframe = this.keyframes.find(kf => kf.id === id);
+    if (keyframe) {
+      keyframe.frame = Math.max(0, newFrame); // Ensure non-negative
+      console.log(`Updated keyframe ${id} to frame ${newFrame}`);
+    }
   }
 
   removeKeyframe(id) {
