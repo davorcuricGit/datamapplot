@@ -1,6 +1,13 @@
 {# Animation controls UI #}
 <div id="animation-controls" class="container-box stack-box" style="max-width: 300px;">
   <h4 style="margin: 0 0 10px 0;">Animation Recorder</h4>
+
+  <div id="current-view-display" style="background: #f0f0f0; padding: 8px; border-radius: 4px; margin-bottom: 10px; font-size: 11px; font-family: monospace;">
+    <div><strong>Current View:</strong></div>
+    <div id="current-zoom">Zoom: --</div>
+    <div id="current-lon">Lon: --</div>
+    <div id="current-lat">Lat: --</div>
+  </div>
   
   <button id="add-keyframe-btn" class="btn btn-primary" style="width: 100%; margin-bottom: 10px;">
     Add Keyframe

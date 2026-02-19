@@ -85,14 +85,30 @@
     {%- endif %}
     
     // Enable edge panning
-    datamap.enableEdgePanning(50, 0.02); // 50px threshold, 0.02 max speed
+    // DISABLED: Edge panning conflicts with controller in controlled mode
+    // Can re-enable once we resolve the viewState management conflicts
+    // datamap.enableEdgePanning(50, 0.02); // 50px threshold, 0.02 max speed
 
     {%- if enable_animation_recorder %}
     //=========================================================================
     // Animation Recorder Setup
     //=========================================================================
 
-    const animationRecorder = new AnimationRecorder(datamap);
+    window.animationRecorder = new AnimationRecorder(datamap);
+
+    // Update current view display
+    function updateCurrentViewDisplay() {
+      const viewport = datamap.deckgl.getViewports()[0];
+      if (viewport) {
+        document.getElementById('current-zoom').textContent = `Zoom: ${viewport.zoom.toFixed(2)}`;
+        document.getElementById('current-lon').textContent = `Lon: ${viewport.longitude.toFixed(4)}`;
+        document.getElementById('current-lat').textContent = `Lat: ${viewport.latitude.toFixed(4)}`;
+      }
+    }
+
+    // Update display every 100ms
+    setInterval(updateCurrentViewDisplay, 100);
+
 
     document.getElementById('add-keyframe-btn').addEventListener('click', () => {
       const kf = animationRecorder.addKeyframe();
@@ -125,11 +141,57 @@
       }
       
       list.innerHTML = keyframes.map(kf => `
-        <div style="padding: 5px; border: 1px solid #ddd; margin-bottom: 5px; border-radius: 3px; background: white;">
-          <strong>Frame ${kf.frame}</strong><br>
-          <small>Zoom: ${kf.viewState.zoom.toFixed(2)}, Lon: ${kf.viewState.longitude.toFixed(2)}, Lat: ${kf.viewState.latitude.toFixed(2)}</small>
-          <button onclick="animationRecorder.removeKeyframe(${kf.id}); updateKeyframesList();" 
-                  style="float: right; font-size: 11px; cursor: pointer; background: #ff4444; color: white; border: none; padding: 2px 6px; border-radius: 3px;">×</button>
+        <div style="padding: 8px; border: 1px solid #ddd; margin-bottom: 5px; border-radius: 3px; background: white;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div style="flex: 1;">
+              <div style="margin-bottom: 5px;">
+                <strong>Frame:</strong> 
+                <input 
+                  type="number" 
+                  value="${kf.frame}" 
+                  onchange="animationRecorder.updateKeyframeTime(${kf.id}, parseInt(this.value)); updateKeyframesList();"
+                  style="width: 70px; padding: 2px 4px; border: 1px solid #ccc; border-radius: 3px;"
+                  min="0"
+                />
+              </div>
+              <div style="font-size: 11px; color: #666;">
+                <div style="margin-bottom: 3px;">
+                  <strong>Zoom:</strong> 
+                  <input 
+                    type="number" 
+                    value="${kf.viewState.zoom.toFixed(2)}" 
+                    onchange="animationRecorder.updateKeyframeViewState(${kf.id}, 'zoom', parseFloat(this.value)); updateKeyframesList();"
+                    style="width: 60px; padding: 2px 4px; border: 1px solid #ccc; border-radius: 3px;"
+                    step="0.1"
+                  />
+                </div>
+                <div style="margin-bottom: 3px;">
+                  <strong>Lon:</strong> 
+                  <input 
+                    type="number" 
+                    value="${kf.viewState.longitude.toFixed(4)}" 
+                    onchange="animationRecorder.updateKeyframeViewState(${kf.id}, 'longitude', parseFloat(this.value)); updateKeyframesList();"
+                    style="width: 90px; padding: 2px 4px; border: 1px solid #ccc; border-radius: 3px;"
+                    step="0.01"
+                  />
+                </div>
+                <div>
+                  <strong>Lat:</strong> 
+                  <input 
+                    type="number" 
+                    value="${kf.viewState.latitude.toFixed(4)}" 
+                    onchange="animationRecorder.updateKeyframeViewState(${kf.id}, 'latitude', parseFloat(this.value)); updateKeyframesList();"
+                    style="width: 90px; padding: 2px 4px; border: 1px solid #ccc; border-radius: 3px;"
+                    step="0.01"
+                  />
+                </div>
+              </div>
+            </div>
+            <button 
+              onclick="animationRecorder.removeKeyframe(${kf.id}); updateKeyframesList();" 
+              style="cursor: pointer; background: #ff4444; color: white; border: none; padding: 4px 8px; border-radius: 3px; font-size: 12px; margin-left: 8px;"
+            >Delete</button>
+          </div>
         </div>
       `).join('');
     }

@@ -1020,6 +1020,7 @@ def render_html(
             enable_histogram,
             enable_topic_tree,
             enable_colormap_selector,
+            enable_animation_recorder,  # KEYFRAME ANIMATOR 
             selection_handler,
             cdn_url=cdn_url,
         ),

@@ -284,6 +284,7 @@ def get_js_dependency_urls(
     enable_histogram,
     enable_topic_tree,
     enable_colormaps,
+    enable_animation_recorder,  # KEYFRAME PARAMETER
     selection_handler=None,
     cdn_url="unpkg.com",
 ):
@@ -318,6 +319,11 @@ def get_js_dependency_urls(
 
     if enable_topic_tree:
         js_dependency_urls.append(f"https://{cdn_url}/jquery@3.7.1/dist/jquery.min.js")
+
+    # ADD THIS BLOCK
+    if enable_animation_recorder:
+        js_dependency_urls.append("https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js")
+
 
     if selection_handler is not None:
         if isinstance(selection_handler, Iterable):
