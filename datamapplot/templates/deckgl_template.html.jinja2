@@ -133,7 +133,7 @@
 
     function updateKeyframesList() {
       const list = document.getElementById('keyframes-list');
-      const keyframes = animationRecorder.getKeyframesList();
+      const keyframes = window.animationRecorder.getKeyframesList();
       
       if (keyframes.length === 0) {
         list.innerHTML = '<p style="text-align: center; color: #999; margin: 20px 0;">No keyframes yet</p>';
@@ -149,10 +149,22 @@
                 <input 
                   type="number" 
                   value="${kf.frame}" 
-                  onchange="animationRecorder.updateKeyframeTime(${kf.id}, parseInt(this.value)); updateKeyframesList();"
+                  onchange="window.animationRecorder.updateKeyframeTime(${kf.id}, parseInt(this.value)); updateKeyframesList();"
                   style="width: 70px; padding: 2px 4px; border: 1px solid #ccc; border-radius: 3px;"
                   min="0"
                 />
+              </div>
+              <div style="margin-bottom: 5px;">
+                <strong>Easing:</strong> 
+                <select 
+                  onchange="window.animationRecorder.updateKeyframeEasing(${kf.id}, this.value); updateKeyframesList();"
+                  style="width: 120px; padding: 2px 4px; border: 1px solid #ccc; border-radius: 3px;"
+                >
+                  <option value="linear" ${kf.easing === 'linear' ? 'selected' : ''}>Linear</option>
+                  <option value="ease-in" ${kf.easing === 'ease-in' ? 'selected' : ''}>Ease In</option>
+                  <option value="ease-out" ${kf.easing === 'ease-out' ? 'selected' : ''}>Ease Out</option>
+                  <option value="ease-in-out" ${kf.easing === 'ease-in-out' ? 'selected' : ''}>Ease In-Out</option>
+                </select>
               </div>
               <div style="font-size: 11px; color: #666;">
                 <div style="margin-bottom: 3px;">
@@ -160,7 +172,7 @@
                   <input 
                     type="number" 
                     value="${kf.viewState.zoom.toFixed(2)}" 
-                    onchange="animationRecorder.updateKeyframeViewState(${kf.id}, 'zoom', parseFloat(this.value)); updateKeyframesList();"
+                    onchange="window.animationRecorder.updateKeyframeViewState(${kf.id}, 'zoom', parseFloat(this.value)); updateKeyframesList();"
                     style="width: 60px; padding: 2px 4px; border: 1px solid #ccc; border-radius: 3px;"
                     step="0.1"
                   />
@@ -170,7 +182,7 @@
                   <input 
                     type="number" 
                     value="${kf.viewState.longitude.toFixed(4)}" 
-                    onchange="animationRecorder.updateKeyframeViewState(${kf.id}, 'longitude', parseFloat(this.value)); updateKeyframesList();"
+                    onchange="window.animationRecorder.updateKeyframeViewState(${kf.id}, 'longitude', parseFloat(this.value)); updateKeyframesList();"
                     style="width: 90px; padding: 2px 4px; border: 1px solid #ccc; border-radius: 3px;"
                     step="0.01"
                   />
@@ -180,7 +192,7 @@
                   <input 
                     type="number" 
                     value="${kf.viewState.latitude.toFixed(4)}" 
-                    onchange="animationRecorder.updateKeyframeViewState(${kf.id}, 'latitude', parseFloat(this.value)); updateKeyframesList();"
+                    onchange="window.animationRecorder.updateKeyframeViewState(${kf.id}, 'latitude', parseFloat(this.value)); updateKeyframesList();"
                     style="width: 90px; padding: 2px 4px; border: 1px solid #ccc; border-radius: 3px;"
                     step="0.01"
                   />
@@ -188,7 +200,7 @@
               </div>
             </div>
             <button 
-              onclick="animationRecorder.removeKeyframe(${kf.id}); updateKeyframesList();" 
+              onclick="window.animationRecorder.removeKeyframe(${kf.id}); updateKeyframesList();" 
               style="cursor: pointer; background: #ff4444; color: white; border: none; padding: 4px 8px; border-radius: 3px; font-size: 12px; margin-left: 8px;"
             >Delete</button>
           </div>

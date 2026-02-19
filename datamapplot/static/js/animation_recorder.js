@@ -5,6 +5,19 @@ class AnimationRecorder {
     this.isRecording = false;
   }
 
+  // ADD THESE EASING FUNCTIONS
+  easingFunctions = {
+    'linear': (t) => t,
+    'ease-in': (t) => t * t * t,  // cubic ease in
+    'ease-out': (t) => 1 - Math.pow(1 - t, 3),  // cubic ease out
+    'ease-in-out': (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2  // smooth S-curve
+  };
+
+  applyEasing(t, easingType) {
+    const easingFunc = this.easingFunctions[easingType] || this.easingFunctions['linear'];
+    return easingFunc(t);
+  }
+
   addKeyframe(frameNumber = null) {
     // Poll the deck.gl instance directly for current camera position
     const viewport = this.datamap.deckgl.getViewports()[0];
@@ -22,12 +35,22 @@ class AnimationRecorder {
     const keyframe = {
       id: this.keyframes.length,
       frame: frame,
-      viewState: currentView
+      viewState: currentView,
+      easing: 'linear'  // default easing
+
     };
     
     this.keyframes.push(keyframe);
     console.log('Keyframe added:', keyframe);
     return keyframe;
+  }
+
+  updateKeyframeEasing(id, easingType) {
+    const keyframe = this.keyframes.find(kf => kf.id === id);
+    if (keyframe) {
+      keyframe.easing = easingType;
+      console.log(`Updated keyframe ${id} easing to ${easingType}`);
+    }
   }
 
   updateKeyframeViewState(id, property, newValue) {
@@ -70,11 +93,14 @@ class AnimationRecorder {
       for (let f = 0; f <= duration; f++) {
         const t = f / duration; // 0 to 1
         
-        // Linear interpolation
+        // Apply easing from the END keyframe (the one we're transitioning TO)
+        const easedT = this.applyEasing(t, end.easing);
+    
+        // Use eased interpolation
         const viewState = {
-          longitude: this.lerp(start.viewState.longitude, end.viewState.longitude, t),
-          latitude: this.lerp(start.viewState.latitude, end.viewState.latitude, t),
-          zoom: this.lerp(start.viewState.zoom, end.viewState.zoom, t),
+          longitude: this.lerp(start.viewState.longitude, end.viewState.longitude, easedT),
+          latitude: this.lerp(start.viewState.latitude, end.viewState.latitude, easedT),
+          zoom: this.lerp(start.viewState.zoom, end.viewState.zoom, easedT),
         };
         
         frames.push({
